@@ -29,4 +29,4 @@ count = 0
 for clock in lanternfish:
     count += simulate(clock, 256)
     
-print(count)
+print(count)  # Answer: 1710166656900
