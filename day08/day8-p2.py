@@ -121,4 +121,4 @@ with open('input.txt', 'r') as file:
     for data in file:
         final_result += decode_signals(data)
 
-print(final_result)
+print(final_result)  # Answer: 1046281
