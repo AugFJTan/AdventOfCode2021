@@ -1,8 +1,6 @@
 # Find the completion string for each incomplete line
 # What is the middle score?
 
-from corrupted import find_illegal
-
 score = {
     ')': 1,
     ']': 2,
@@ -33,6 +31,8 @@ def find_incomplete(data):
                        (open_symbol == '<' and symbol == '>'):
                         level -= 1
                         chunk_tree.remove(chunk_data)
+                    else:
+                        return None
 
     chunk_tree.reverse()
 
@@ -53,24 +53,20 @@ def find_incomplete(data):
     return missing
 
 
-incomplete = []
+all_scores = []
 
 with open('input.txt', 'r') as file:
     for line in file:
-        if not find_illegal(line):
-            incomplete.append(line)
+        missing = find_incomplete(line)
+        if missing:
+            current_score = 0
 
+            for symbol in missing:
+                current_score *= 5
+                current_score += score[symbol]
 
-all_scores = []
+            all_scores.append(current_score)
 
-for line in incomplete:
-    current_score = 0
-
-    for symbol in find_incomplete(line):
-        current_score *= 5
-        current_score += score[symbol]
-    
-    all_scores.append(current_score)
 
 all_scores.sort()
 
