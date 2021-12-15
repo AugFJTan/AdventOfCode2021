@@ -6,12 +6,13 @@
 
 ## Recursion Record
 
-Total: 4 solutions
+Total: 5 solutions
 
  - Day 6 (functools optimisation)
  - Day 9 (flood fill)
  - Day 11 (chain reaction)
  - Day 12 (graph traversal)
+ - Day 14 (functools optimisation)
 
 # Acknowledgement
 
