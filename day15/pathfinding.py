@@ -18,7 +18,17 @@ class Node:
 class Environment:
     def __init__(self):
         self.graph = []
+        
+        self.generate_graph()
+        
+        self.graph_width = len(self.graph[0])
+        self.graph_height = len(self.graph)
 
+        self.start = self.graph[0][0]
+        self.goal = self.graph[self.graph_height-1][self.graph_width-1]
+
+
+    def generate_graph(self):
         with open('input.txt', 'r') as file:
             for y, line in enumerate(file):
                 risk = list(map(int, line.rstrip()))
@@ -28,12 +38,6 @@ class Environment:
                     nodes.append(Node(x, y, r))
                 
                 self.graph.append(nodes)
-        
-        self.graph_width = len(self.graph[0])
-        self.graph_height = len(self.graph)
-
-        self.start = self.graph[0][0]
-        self.goal = self.graph[self.graph_height-1][self.graph_width-1]
 
 
     def get_adjacent(self, node):
@@ -57,6 +61,54 @@ class Environment:
             adjacent.append(self.graph[y-1][x])
         
         return adjacent
+
+
+class FullEnvironment(Environment):
+    def __init__(self):
+        super().__init__()
+
+
+    def generate_graph(self):
+        base_tile = []
+        
+        with open('input.txt', 'r') as file:
+            for line in file:
+                risk = list(map(int, line.rstrip()))
+                base_tile.append(risk)
+        
+        base_width = len(base_tile[0])
+        base_height = len(base_tile)
+        
+        for _ in range(base_height * 5):
+            self.graph.append([None] * (base_width * 5))
+        
+        # Calculate risk horizontally
+        for y in range(base_height):
+            for x in range(base_width):
+                risk = base_tile[y][x]
+                
+                for i in range(5):
+                    if risk > 9:
+                        risk = 1
+                    
+                    dx = i * base_width
+                    self.graph[y][x + dx] = Node(x + dx, y, risk)
+                    
+                    risk += 1
+        
+        # Calculate risk vertically
+        for y in range(base_height):
+            for x in range(base_width * 5):
+                risk = self.graph[y][x].risk + 1
+                
+                for i in range(1, 5):
+                    if risk > 9:
+                        risk = 1
+                        
+                    dy = i * base_height
+                    self.graph[y + dy][x] = Node(x, y + dy, risk)
+                    
+                    risk += 1
 
 
 class AStar:
