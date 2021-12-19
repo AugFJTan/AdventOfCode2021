@@ -21,19 +21,14 @@ for hex_value in packet:
     data += bin(int(hex_value, 16))[2:].zfill(4)  # Pad out binary number
 
 
-def parse_header(pos, result, values):
-    if pos > len(data):
-        return pos, result
-
+def parse_header(pos):
     packet_version = int(data[pos:pos+3], 2)
     packet_type_id = int(data[pos+3:pos+6], 2)
     
     if packet_type_id == 4:
-        pos, literal = parse_literal(pos+6)
-        values.append(literal)
+        pos, result = parse_literal(pos+6)
     else:
         pos, result = parse_operator(pos+6, packet_type_id)
-        values.append(result)
     
     return pos, result
 
@@ -69,7 +64,8 @@ def parse_sub_packets(pos, num):
     values = []
 
     for _ in range(num):
-        pos, _ = parse_header(pos, 0, values)
+        pos, result = parse_header(pos)
+        values.append(result)
 
     return pos, values
 
@@ -79,7 +75,8 @@ def parse_length(pos, length):
     end = pos + length
     
     while pos != end:
-        pos, _ = parse_header(pos, 0, values)
+        pos, result = parse_header(pos)
+        values.append(result)
 
     return pos, values
 
@@ -108,4 +105,4 @@ def apply_operator(operator, values):
         return 1 if values[0] == values[1] else 0
 
 
-print(parse_header(0, 0, [])[1])  # Answer: 68703010504
+print(parse_header(0)[1])  # Answer: 68703010504

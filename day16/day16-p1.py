@@ -25,9 +25,6 @@ for hex_value in packet:
 def parse_header(pos):
     global version_count
 
-    if pos > len(data):
-        return pos
-
     packet_version = int(data[pos:pos+3], 2)
     packet_type_id = int(data[pos+3:pos+6], 2)
     
