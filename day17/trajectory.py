@@ -14,6 +14,13 @@ def check_hit(pos, xbox, ybox):
     return False, True       # Continue
 
 
+# - x position += x velocity
+# - y position += y velocity
+# - Due to drag:
+#    + if x velocity > 0, x velocity -= 1
+#    + if x velocity < 0, x velocity += 1
+#    + if x velocity = 0, no change
+# - Due to gravity, y velocity -= 1
 def update_trajectory(pos, vel):
     pos[0] += vel[0]
     pos[1] += vel[1]

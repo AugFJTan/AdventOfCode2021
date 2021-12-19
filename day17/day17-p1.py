@@ -1,13 +1,5 @@
 # Find initial velocity to reach highest y position and still enter target area
 # What is the highest y position on this trajectory?
-#
-# - x position increases by x velocity
-# - y position increases by y velocity
-# - Due to drag:
-#    + if x velocity > 0, x velocity -= 1
-#    + if x velocity < 0, x velocity += 1
-#    + if x velocity = 0, no change
-# - Due to gravity, y velocity decreases by 1
 
 
 from trajectory import *
