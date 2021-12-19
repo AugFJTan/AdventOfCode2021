@@ -77,7 +77,7 @@ def parse_length(pos, length):
     while pos != end:
         pos = parse_header(pos)
 
-    return end
+    return pos
 
 
 parse_header(0)
