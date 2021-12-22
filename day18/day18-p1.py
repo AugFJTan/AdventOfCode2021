@@ -18,6 +18,8 @@
 # What is the magnitude of the final sum?
 
 
+import math
+
 class Pair:
     def __init__(self, lhs, rhs):
         self.lhs = lhs
@@ -27,28 +29,64 @@ class Pair:
         return [self.lhs.get_value(), self.rhs.get_value()]
     
     def reduce(self, parent=None, level=0):
-        current = self
-        
-        if isinstance(current.lhs, Pair):
-            current.lhs.reduce(current, level+1)
-        elif isinstance(current.rhs, Pair):
-            current.rhs.reduce(current, level+1)
+        left_reduce = self.lhs.reduce(self, level+1)
+        right_reduce = self.rhs.reduce(self, level+1)
+
+        if left_reduce:
+            return left_reduce
+        elif right_reduce:
+            return right_reduce
         elif level == 4:
-            parent.explode()
+            return self.get_innermost()
+        else:
+            return None
     
-    def explode(self):
-        if isinstance(self.lhs, Pair):
-            pair = self.lhs
-            regular = self.rhs
-            
-            self.lhs = RegularNumber(0)
-            self.rhs = RegularNumber(pair.rhs.get_value() + regular.get_value())
-        elif isinstance(self.rhs, Pair):
-            regular = self.lhs
-            pair = self.rhs
-            
-            self.lhs = RegularNumber(pair.lhs.get_value() + regular.get_value())
-            self.rhs = RegularNumber(0)
+    def get_innermost(self):
+        if isinstance(self.lhs, RegularNumber) and isinstance(self.rhs, RegularNumber):
+            return self
+        elif isinstance(self.lhs, RegularNumber):
+            return self.rhs.get_innermost()
+        else:
+            return self.lhs.get_innermost()
+    
+    def contains(self, value):
+        if self == value:
+            return True
+        else:
+            return self.lhs.contains(value) or self.rhs.contains(value)
+    
+    def get_leftmost(self):
+        if isinstance(self.lhs, RegularNumber):
+            return self.lhs
+        else:
+            return self.lhs.get_leftmost()
+    
+    def get_rightmost(self):
+        if isinstance(self.rhs, RegularNumber):
+            return self.rhs
+        else:
+            return self.rhs.get_rightmost()
+    
+    def replace(self, parent, existing, new):
+        if parent.lhs == existing:
+            parent.lhs = new
+        elif parent.rhs == existing:
+            parent.rhs = new
+        elif parent.lhs.contains(existing):
+            parent.lhs.replace(self, existing, new)
+        else:
+            parent.rhs.replace(self, existing, new)
+    
+    def get_level(self, value, level=0):
+        if self == value:
+            return level
+        elif self.lhs.contains(value):
+            return self.lhs.get_level(value, level+1)
+        else:
+            return self.rhs.get_level(value, level+1)
+    
+    def get_magnitude(self):
+        return self.lhs.get_magnitude() * 3 + self.rhs.get_magnitude() * 2
 
 
 class RegularNumber:
@@ -57,9 +95,22 @@ class RegularNumber:
 
     def get_value(self):
         return self.value
-
-
-data = 'RAW DATA HERE'
+    
+    def reduce(self, parent, level):
+        if self.value >= 10:
+            return self
+        else:
+            return None
+    
+    def contains(self, value):
+        return self == value
+    
+    def replace(self, parent, existing, new):
+        if self == existing:
+            self.value = new.value
+    
+    def get_magnitude(self):
+        return self.value
 
 
 def parse_number(raw):
@@ -84,7 +135,84 @@ def parse_number(raw):
     return Pair(parse_number(lhs), parse_number(rhs))
 
 
-number = parse_number(data)
-number.reduce()
+def explode_pair(root, exploded):
+    current = root
+    left = None
+    right = None
+
+    while current != exploded:
+        if current.lhs.contains(exploded):
+            right = current.rhs
+            current = current.lhs
+        else:
+            left = current.lhs
+            current = current.rhs
+
+    if left:
+        if isinstance(left, Pair):
+            left_regular = left.get_rightmost()
+        else:
+            left_regular = left
+
+        left_replace = RegularNumber(current.lhs.get_value() + left_regular.get_value())
+        root.replace(root, left_regular, left_replace)
+        
+        #if left_replace.value >= 10:
+        #    split_regular(root, left_replace)
+
+    if right:
+        if isinstance(right, Pair):
+            right_regular = right.get_leftmost()
+        else:
+            right_regular = right
+
+        right_replace = RegularNumber(current.rhs.get_value() + right_regular.get_value())
+        root.replace(root, right_regular, right_replace)
+        
+        #if right_replace.value >= 10:
+        #    split_regular(root, right_replace)
+
+    root.replace(root, exploded, RegularNumber(0))
+
+
+def split_regular(root, split):
+    round_down = math.floor(split.value / 2)
+    round_up   = math.ceil(split.value / 2)
+    split_pair = Pair(RegularNumber(round_down), RegularNumber(round_up))
+    root.replace(root, split, split_pair)
+    
+    print(root.get_level(split_pair))
+    
+    #if root.get_level(split_pair) >= 4:
+    #    explode_pair(root, split_pair)
+
+
+with open('input.txt', 'r') as file:
+    lhs = parse_number(file.readline().rstrip())
+
+    for line in file:
+        rhs = parse_number(line.rstrip())
+
+        number = Pair(lhs, rhs)
+
+        print(number.get_value())
+
+        while True:
+            reduced = number.reduce()
+
+            if not reduced:
+                break
+
+            if isinstance(reduced, Pair):
+                explode_pair(number, reduced)
+            else:
+                split_regular(number, reduced)
+
+            print(number.get_value())
+
+        print()
+
+        lhs = rhs
 
 print(number.get_value())
+print(number.get_magnitude())
