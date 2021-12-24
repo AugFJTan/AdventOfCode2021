@@ -156,9 +156,6 @@ def explode_pair(root, exploded):
 
         left_replace = RegularNumber(current.lhs.get_value() + left_regular.get_value())
         root.replace(root, left_regular, left_replace)
-        
-        #if left_replace.value >= 10:
-        #    split_regular(root, left_replace)
 
     if right:
         if isinstance(right, Pair):
@@ -168,9 +165,6 @@ def explode_pair(root, exploded):
 
         right_replace = RegularNumber(current.rhs.get_value() + right_regular.get_value())
         root.replace(root, right_regular, right_replace)
-        
-        #if right_replace.value >= 10:
-        #    split_regular(root, right_replace)
 
     root.replace(root, exploded, RegularNumber(0))
 
@@ -180,11 +174,6 @@ def split_regular(root, split):
     round_up   = math.ceil(split.value / 2)
     split_pair = Pair(RegularNumber(round_down), RegularNumber(round_up))
     root.replace(root, split, split_pair)
-    
-    print(root.get_level(split_pair))
-    
-    #if root.get_level(split_pair) >= 4:
-    #    explode_pair(root, split_pair)
 
 
 with open('input.txt', 'r') as file:
@@ -194,8 +183,6 @@ with open('input.txt', 'r') as file:
         rhs = parse_number(line.rstrip())
 
         number = Pair(lhs, rhs)
-
-        print(number.get_value())
 
         while True:
             reduced = number.reduce()
@@ -208,11 +195,6 @@ with open('input.txt', 'r') as file:
             else:
                 split_regular(number, reduced)
 
-            print(number.get_value())
-
-        print()
-
         lhs = rhs
 
-print(number.get_value())
-print(number.get_magnitude())
+    print(number.get_magnitude())
