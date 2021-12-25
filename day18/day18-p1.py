@@ -28,26 +28,19 @@ class Pair:
     def get_value(self):
         return [self.lhs.get_value(), self.rhs.get_value()]
     
-    def reduce(self, parent=None, level=0):
-        left_reduce = self.lhs.reduce(self, level+1)
-        right_reduce = self.rhs.reduce(self, level+1)
+    def reduce(self, level=0):
+        left_reduce = self.lhs.reduce(level+1)
+        right_reduce = self.rhs.reduce(level+1)
+
+        if level == 4:
+            return self
 
         if left_reduce:
             return left_reduce
         elif right_reduce:
             return right_reduce
-        elif level == 4:
-            return self.get_innermost()
         else:
             return None
-    
-    def get_innermost(self):
-        if isinstance(self.lhs, RegularNumber) and isinstance(self.rhs, RegularNumber):
-            return self
-        elif isinstance(self.lhs, RegularNumber):
-            return self.rhs.get_innermost()
-        else:
-            return self.lhs.get_innermost()
     
     def contains(self, value):
         if self == value:
@@ -77,14 +70,6 @@ class Pair:
         else:
             parent.rhs.replace(self, existing, new)
     
-    def get_level(self, value, level=0):
-        if self == value:
-            return level
-        elif self.lhs.contains(value):
-            return self.lhs.get_level(value, level+1)
-        else:
-            return self.rhs.get_level(value, level+1)
-    
     def get_magnitude(self):
         return self.lhs.get_magnitude() * 3 + self.rhs.get_magnitude() * 2
 
@@ -96,7 +81,7 @@ class RegularNumber:
     def get_value(self):
         return self.value
     
-    def reduce(self, parent, level):
+    def reduce(self, level):
         if self.value >= 10:
             return self
         else:
